@@ -4,7 +4,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import KFold, GridSearchCV
 import seaborn as sns
-
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
@@ -32,6 +31,7 @@ class diabetesLogReg:
 
 
     def preprocessing(self):
+
         #K-fold cross validation
         kf = KFold(n_splits = 9, shuffle = True, random_state = 19)
 
@@ -50,15 +50,14 @@ class diabetesLogReg:
     def train(self):
         #HYPERPARAM TUNING
 
-        global model
-        model = LogisticRegression(max_iter = 50, class_weight="balanced")
-
         param_grid = {
             "C": np.logspace(-3,3,7),
             "penalty": ["l1", "l2"],
-            "solver": ["newton-cg", "lbfgs", "sag", "saga", "liblinear"],
-            "max_iter": [10,20,30,40,50]
+            "solver": ["lbfgs", "saga"],
+            "max_iter": [50,60,70,80,90,100,110,120]
         }
+
+        model = LogisticRegression()
 
         grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=5, scoring='accuracy')
 
@@ -68,25 +67,21 @@ class diabetesLogReg:
         global tuned_model
         tuned_model = grid_search.best_estimator_
         
-        
-        model.fit(x_train_s,Y_train)
-        y_pred = model.predict(x_test_s)
         t_y_pred = tuned_model.predict(x_test_s)
-        return (accuracy_score(Y_test, y_pred) * 100), (accuracy_score(Y_test, t_y_pred) * 100)
-
-
-
-
+        return #
     
     def diabetes_pred(self):
-        prob = tuned_model.predict_proba([[self.preg, self.glucose, self.BP, self.skinThickness, self.insulin, self.bmi, self.diabetesPedigreeFunction, self.age]])
-        print(prob)
-        if prob[0,1] > 0.5:
-            return "Diabetes"
-        else:
-            return "No Diabetes"
-    
-    #def decision_boundary_graph():
+        lst = []
+        for test in x_test_s:
+            lst.append(tuned_model.predict([test]))
+        return lst
+
+        #prob = tuned_model.predict_proba([[self.preg, self.glucose, self.BP, self.skinThickness, self.insulin, self.bmi, self.diabetesPedigreeFunction, self.age]])
+        #print(prob)
+        #if prob[0,1] > 0.5:
+        #    return "Diabetes"
+        #else:
+        #    return "No Diabetes"
     
 
 
